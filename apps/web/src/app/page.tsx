@@ -29,7 +29,6 @@ import {
 import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu-styles";
 import { Menu, Rocket, Shield, Zap } from "lucide-react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
 
 export default function Home() {
   return (
@@ -50,7 +49,7 @@ export default function Home() {
                     <ul className="grid gap-3 p-4 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
                       <li className="row-span-3">
                         <NavigationMenuLink asChild>
-                          <a
+                          <Link
                             className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
                             href="/"
                           >
@@ -61,12 +60,12 @@ export default function Home() {
                             <p className="text-sm leading-tight text-muted-foreground">
                               Built with the latest tech stack for speed.
                             </p>
-                          </a>
+                          </Link>
                         </NavigationMenuLink>
                       </li>
                       <li>
                         <NavigationMenuLink asChild>
-                          <a
+                          <Link
                             href="/"
                             className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
                           >
@@ -76,12 +75,12 @@ export default function Home() {
                             <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
                               Top-notch security practices.
                             </p>
-                          </a>
+                          </Link>
                         </NavigationMenuLink>
                       </li>
                       <li>
                         <NavigationMenuLink asChild>
-                          <a
+                          <Link
                             href="/"
                             className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
                           >
@@ -91,7 +90,7 @@ export default function Home() {
                             <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
                               Grows with your business needs.
                             </p>
-                          </a>
+                          </Link>
                         </NavigationMenuLink>
                       </li>
                     </ul>
@@ -222,12 +221,12 @@ export default function Home() {
               Contact Us
             </h2>
              <p className="max-w-[85%] leading-normal text-muted-foreground sm:text-lg sm:leading-7">
-              Have questions? We'd love to hear from you.
+              Have questions? We&apos;d love to hear from you.
             </p>
              <Card className="w-full max-w-md text-left">
                 <CardHeader>
                     <CardTitle>Get in touch</CardTitle>
-                    <CardDescription>Fill out the form below and we'll get back to you.</CardDescription>
+                    <CardDescription>Fill out the form below and we&apos;ll get back to you.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="space-y-2">
