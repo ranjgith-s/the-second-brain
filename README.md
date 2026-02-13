@@ -1,3 +1,21 @@
+# The Second Brain
+
+For detailed setup and installation instructions, please refer to [docs/SETUP.md](docs/SETUP.md).
+
+## Quick Start
+
+### macOS / Linux
+```bash
+./setup.sh
+```
+
+### Windows
+```cmd
+setup.bat
+```
+
+---
+
 # The Second Brain: Requirements Specification
 
 > "Your digital extension. A literal second brain that evolves with you."
