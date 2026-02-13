@@ -6,6 +6,17 @@ from models import Note
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 from typing import List
+from pydantic import BaseModel
+from langchain_core.messages import HumanMessage
+from graph import app as agent_app
+
+class ChatRequest(BaseModel):
+    message: str
+    provider: str
+    api_key: str
+
+class ChatResponse(BaseModel):
+    response: str
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -52,3 +63,12 @@ async def read_notes(skip: int = 0, limit: int = 100, session: AsyncSession = De
     result = await session.execute(select(Note).offset(skip).limit(limit))
     notes = result.scalars().all()
     return notes
+
+@app.post("/chat", response_model=ChatResponse)
+async def chat(request: ChatRequest):
+    inputs = {"messages": [HumanMessage(content=request.message)]}
+    config = {"configurable": {"provider": request.provider, "api_key": request.api_key}}
+
+    result = await agent_app.ainvoke(inputs, config=config)
+    last_message = result["messages"][-1]
+    return ChatResponse(response=str(last_message.content))
