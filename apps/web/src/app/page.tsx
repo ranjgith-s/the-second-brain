@@ -1,9 +1,30 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Settings } from "lucide-react";
-import SettingsModal from "../components/SettingsModal";
-import { getDecrypted } from "../utils/storage";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
+import { Rocket, Settings, MessageSquare, StickyNote } from "lucide-react";
+import SettingsModal from "@/components/SettingsModal";
+import { getDecrypted } from "@/utils/storage";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 interface Note {
   id: string;
@@ -11,8 +32,6 @@ interface Note {
   category: string;
   created_at: string;
 }
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export default function Home() {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -114,107 +133,185 @@ export default function Home() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center p-8 bg-gray-100 text-black">
-      <div className="z-10 max-w-5xl w-full flex items-center justify-between font-mono text-sm mb-8">
-        <h1 className="text-4xl font-bold">The Second Brain</h1>
-        <button
-          onClick={() => setIsSettingsOpen(true)}
-          className="p-2 hover:bg-gray-200 rounded-full text-gray-600 transition-colors"
-          title="Settings"
-        >
-          <Settings size={24} />
-        </button>
-      </div>
-
-      <div className="flex gap-4 mb-4">
-        <button
-          onClick={() => setActiveTab("notes")}
-          className={`px-4 py-2 rounded-lg transition-colors ${activeTab === "notes" ? "bg-blue-600 text-white" : "bg-white text-gray-700 hover:bg-gray-50"}`}
-        >
-          Notes
-        </button>
-        <button
-          onClick={() => setActiveTab("chat")}
-          className={`px-4 py-2 rounded-lg transition-colors ${activeTab === "chat" ? "bg-blue-600 text-white" : "bg-white text-gray-700 hover:bg-gray-50"}`}
-        >
-          Chat
-        </button>
-      </div>
-
-      <div className="flex-1 w-full max-w-2xl bg-white rounded-lg shadow-xl overflow-hidden flex flex-col h-[600px]">
-        {activeTab === "notes" ? (
-          <>
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {notes.map((note) => (
-                <div key={note.id} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                  <p className="text-gray-800">{note.content}</p>
-                  <span className="text-xs text-gray-500 mt-2 block">
-                    {new Date(note.created_at).toLocaleString()}
-                  </span>
-                </div>
-              ))}
-              {notes.length === 0 && (
-                <p className="text-center text-gray-400 mt-10">No notes yet. Start typing!</p>
-              )}
-            </div>
-
-            <form onSubmit={handleNoteSubmit} className="p-4 border-t bg-gray-50">
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  placeholder="Type a note..."
-                  className="flex-1 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
-                  disabled={isLoading}
-                />
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
-                >
-                  {isLoading ? "Saving..." : "Save"}
-                </button>
-              </div>
-            </form>
-          </>
-        ) : (
-          <div className="flex flex-col h-full">
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {chatMessages.map((msg, idx) => (
-                <div key={idx} className={`p-3 rounded-lg max-w-[80%] ${msg.role === "user" ? "bg-blue-100 ml-auto" : "bg-gray-100"}`}>
-                  <p className="text-xs font-semibold mb-1 text-gray-500 capitalize">{msg.role}</p>
-                  <p className="text-gray-800 whitespace-pre-wrap text-sm">{msg.content}</p>
-                </div>
-              ))}
-              {chatMessages.length === 0 && (
-                <p className="text-center text-gray-400 mt-10">Start a conversation...</p>
-              )}
-            </div>
-            <form onSubmit={handleChatSubmit} className="p-4 border-t bg-gray-50">
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
-                  placeholder="Ask something..."
-                  className="flex-1 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
-                  disabled={isChatLoading}
-                />
-                <button
-                  type="submit"
-                  disabled={isChatLoading}
-                  className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
-                >
-                  {isChatLoading ? "..." : "Send"}
-                </button>
-              </div>
-            </form>
+    <div className="flex flex-col min-h-screen">
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container flex h-14 items-center">
+          <div className="mr-4 hidden md:flex">
+            <Link className="mr-6 flex items-center space-x-2" href="/">
+              <span className="hidden font-bold sm:inline-block">
+                The Second Brain
+              </span>
+            </Link>
+            <NavigationMenu>
+              <NavigationMenuList>
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger>Features</NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <ul className="grid gap-3 p-4 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
+                      <li className="row-span-3">
+                        <NavigationMenuLink asChild>
+                          <Link
+                            className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
+                            href="/"
+                          >
+                            <Rocket className="h-6 w-6" />
+                            <div className="mb-2 mt-4 text-lg font-medium">
+                              Fast Performance
+                            </div>
+                            <p className="text-sm leading-tight text-muted-foreground">
+                              Built with the latest tech stack for speed.
+                            </p>
+                          </Link>
+                        </NavigationMenuLink>
+                      </li>
+                      <li>
+                        <NavigationMenuLink asChild>
+                          <Link
+                            href="/"
+                            className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                          >
+                            <div className="text-sm font-medium leading-none">
+                              Secure
+                            </div>
+                            <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                              Top-notch security practices.
+                            </p>
+                          </Link>
+                        </NavigationMenuLink>
+                      </li>
+                      <li>
+                        <NavigationMenuLink asChild>
+                          <Link
+                            href="/"
+                            className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                          >
+                            <div className="text-sm font-medium leading-none">
+                              Scalable
+                            </div>
+                            <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                              Grows with your business needs.
+                            </p>
+                          </Link>
+                        </NavigationMenuLink>
+                      </li>
+                    </ul>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
           </div>
-        )}
-      </div>
+          <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
+            <div className="w-full flex-1 md:w-auto md:flex-none">
+              <Button variant="ghost" size="icon" onClick={() => setIsSettingsOpen(true)}>
+                <Settings className="h-5 w-5" />
+                <span className="sr-only">Settings</span>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
 
-      {isSettingsOpen && <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />}
-    </main>
+      <main className="flex-1 container py-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="md:col-span-1 space-y-4">
+             <Card>
+               <CardHeader>
+                 <CardTitle>Navigation</CardTitle>
+               </CardHeader>
+               <CardContent className="grid gap-2">
+                 <Button
+                    variant={activeTab === "notes" ? "default" : "ghost"}
+                    className="justify-start"
+                    onClick={() => setActiveTab("notes")}
+                  >
+                    <StickyNote className="mr-2 h-4 w-4" />
+                    Notes
+                 </Button>
+                 <Button
+                    variant={activeTab === "chat" ? "default" : "ghost"}
+                    className="justify-start"
+                    onClick={() => setActiveTab("chat")}
+                  >
+                    <MessageSquare className="mr-2 h-4 w-4" />
+                    Chat
+                 </Button>
+               </CardContent>
+             </Card>
+          </div>
+
+          <div className="md:col-span-3">
+            <Card className="h-[600px] flex flex-col">
+              <CardHeader>
+                <CardTitle>{activeTab === "notes" ? "My Notes" : "AI Assistant"}</CardTitle>
+                <CardDescription>
+                  {activeTab === "notes" ? "Capture your thoughts and ideas." : "Chat with your second brain."}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex-1 overflow-y-auto">
+                 {activeTab === "notes" ? (
+                    <div className="space-y-4">
+                      {notes.length === 0 ? (
+                        <p className="text-center text-muted-foreground py-10">No notes yet. Start typing!</p>
+                      ) : (
+                        notes.map((note) => (
+                          <div key={note.id} className="rounded-lg border p-4 bg-muted/50">
+                            <p className="text-sm">{note.content}</p>
+                            <span className="text-xs text-muted-foreground mt-2 block">
+                              {new Date(note.created_at).toLocaleString()}
+                            </span>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                 ) : (
+                    <div className="space-y-4">
+                      {chatMessages.length === 0 ? (
+                        <p className="text-center text-muted-foreground py-10">Start a conversation...</p>
+                      ) : (
+                        chatMessages.map((msg, idx) => (
+                          <div key={idx} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                            <div className={`rounded-lg px-4 py-2 max-w-[80%] ${msg.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
+                              <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                 )}
+              </CardContent>
+              <CardFooter className="pt-4 border-t">
+                {activeTab === "notes" ? (
+                  <form onSubmit={handleNoteSubmit} className="flex w-full gap-2">
+                    <Input
+                      placeholder="Type a note..."
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      disabled={isLoading}
+                    />
+                    <Button type="submit" disabled={isLoading}>
+                      {isLoading ? "Saving..." : "Save"}
+                    </Button>
+                  </form>
+                ) : (
+                  <form onSubmit={handleChatSubmit} className="flex w-full gap-2">
+                    <Input
+                      placeholder="Ask something..."
+                      value={chatInput}
+                      onChange={(e) => setChatInput(e.target.value)}
+                      disabled={isChatLoading}
+                    />
+                    <Button type="submit" disabled={isChatLoading}>
+                      {isChatLoading ? "..." : "Send"}
+                    </Button>
+                  </form>
+                )}
+              </CardFooter>
+            </Card>
+          </div>
+        </div>
+      </main>
+
+      <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
+    </div>
   );
 }

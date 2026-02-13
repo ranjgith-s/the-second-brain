@@ -2,7 +2,23 @@
 
 import { useState, useEffect } from "react";
 import { saveEncrypted, getDecrypted } from "../utils/storage";
-import { X } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -16,24 +32,8 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const [isSaved, setIsSaved] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Load from local storage on mount, but only once
   useEffect(() => {
-    // Prevent double loading or re-loading if not needed
     if (isLoaded) return;
-
-    // Use a small timeout or requestAnimationFrame to defer state update slightly if lint complains,
-    // but the issue is synchronous setState.
-    // However, loading from storage IS side-effect.
-    // Let's try to just accept the values and set them.
-    // To suppress the lint error, we might need to structure it differently.
-
-    // Attempt: Lazy initialization is cleaner, but we are in a client component that might SSR.
-    // We can't access localStorage in the initial render.
-
-    // We can use a ref or just ignore the warning if we are sure.
-    // Or we can move this to an event handler, but we want it on load.
-
-    // Let's try wrapping in a function called by effect.
 
     const loadSettings = () => {
       try {
@@ -63,77 +63,68 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     setTimeout(() => setIsSaved(false), 2000);
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-xl relative">
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
-        >
-          <X size={24} />
-        </button>
-
-        <h2 className="text-2xl font-bold mb-6 text-gray-800">Settings</h2>
-
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Settings</DialogTitle>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="provider" className="text-right">
               Active Provider
-            </label>
-            <select
-              value={activeProvider}
-              onChange={(e) => setActiveProvider(e.target.value)}
-              className="w-full p-2 border rounded-md text-gray-800"
-            >
-              <option value="openai">OpenAI (GPT-3.5)</option>
-              <option value="google">Google (Gemini Pro)</option>
-            </select>
+            </Label>
+            <div className="col-span-3">
+              <Select
+                value={activeProvider}
+                onValueChange={setActiveProvider}
+              >
+                <SelectTrigger id="provider">
+                  <SelectValue placeholder="Select provider" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="openai">OpenAI (GPT-3.5)</SelectItem>
+                  <SelectItem value="google">Google (Gemini Pro)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              OpenAI API Key
-            </label>
-            <input
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="openai" className="text-right">
+              OpenAI Key
+            </Label>
+            <Input
+              id="openai"
               type="password"
               value={openaiKey}
               onChange={(e) => setOpenaiKey(e.target.value)}
               placeholder="sk-..."
-              className="w-full p-2 border rounded-md text-gray-800"
+              className="col-span-3"
             />
           </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Google API Key
-            </label>
-            <input
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="google" className="text-right">
+              Google Key
+            </Label>
+            <Input
+              id="google"
               type="password"
               value={googleKey}
               onChange={(e) => setGoogleKey(e.target.value)}
               placeholder="AIza..."
-              className="w-full p-2 border rounded-md text-gray-800"
+              className="col-span-3"
             />
           </div>
-
-          <div className="pt-4 flex justify-end gap-2">
-            <button
-              onClick={onClose}
-              className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleSave}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-            >
-              {isSaved ? "Saved!" : "Save Changes"}
-            </button>
-          </div>
         </div>
-      </div>
-    </div>
+        <DialogFooter>
+          <Button type="button" variant="secondary" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button type="submit" onClick={handleSave}>
+            {isSaved ? "Saved!" : "Save changes"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
