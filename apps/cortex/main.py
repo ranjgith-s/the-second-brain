@@ -1,7 +1,11 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-from database import init_db
+from database import init_db, get_session
+from models import Note
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel import select
+from typing import List
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -35,3 +39,16 @@ async def health_check():
 @app.get("/")
 async def root():
     return {"message": "Welcome to The Second Brain Cortex"}
+
+@app.post("/notes/", response_model=Note)
+async def create_note(note: Note, session: AsyncSession = Depends(get_session)):
+    session.add(note)
+    await session.commit()
+    await session.refresh(note)
+    return note
+
+@app.get("/notes/", response_model=List[Note])
+async def read_notes(skip: int = 0, limit: int = 100, session: AsyncSession = Depends(get_session)):
+    result = await session.execute(select(Note).offset(skip).limit(limit))
+    notes = result.scalars().all()
+    return notes
