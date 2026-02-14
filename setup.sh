@@ -20,15 +20,26 @@ echo "Starting setup in $MODE mode..."
 
 # Check prerequisites
 if command -v python3 &> /dev/null; then
+    PYTHON_CMD="python3"
     echo "Python 3 found."
 elif command -v python &> /dev/null; then
+    PYTHON_CMD="python"
     echo "Python found."
 else
     echo "Error: Python is not installed."
     exit 1
 fi
 
-check_tool poetry
+if command -v poetry &> /dev/null; then
+    POETRY_CMD="poetry"
+elif $PYTHON_CMD -m poetry --version &> /dev/null; then
+    POETRY_CMD="$PYTHON_CMD -m poetry"
+else
+    echo "Error: poetry is not installed."
+    echo "You can install it using: $PYTHON_CMD -m pip install poetry"
+    exit 1
+fi
+echo "Using poetry command: $POETRY_CMD"
 check_tool node
 check_tool npm
 
@@ -49,10 +60,10 @@ if [ ! -f .env ]; then
 fi
 
 echo "Installing backend dependencies..."
-poetry install
+$POETRY_CMD install
 
 echo "Running backend tests..."
-PYTHONPATH=. poetry run pytest
+PYTHONPATH=. $POETRY_CMD run pytest
 
 cd ../..
 
@@ -98,7 +109,7 @@ trap cleanup EXIT
 # Start Backend
 cd apps/cortex
 echo "Starting Backend on http://localhost:8000"
-poetry run uvicorn main:app --reload --port 8000 &
+$POETRY_CMD run uvicorn main:app --reload --port 8000 &
 BACKEND_PID=$!
 cd ../..
 
